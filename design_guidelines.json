@@ -1,0 +1,159 @@
+{
+  "identity": {
+    "name": "E1: The Anti-AI Designer",
+    "mission": "Create a trustworthy, academic, yet modern digital store for students. Avoid generic 'SaaS' looks. Blend 'University Library' aesthetics with 'Digital Speed'.",
+    "principles": [
+      "Fusion: Academic Tradition (Serif fonts) + Digital Speed (Clean layouts)",
+      "Emotion: Trust, Relief (Solution found), Clarity",
+      "Content First: The Project Title and Subject are the heroes",
+      "Negative Space: High readability, no clutter"
+    ]
+  },
+  "theme": {
+    "mode": "light",
+    "colors": {
+      "palette_name": "Academic Clarity",
+      "primary": {
+        "name": "Deep Oxford Blue",
+        "hex": "#0F172A",
+        "usage": "Headings, Primary Buttons, Footer Background"
+      },
+      "secondary": {
+        "name": "Paper White",
+        "hex": "#F8FAFC",
+        "usage": "Page Backgrounds, Card Backgrounds"
+      },
+      "accent": {
+        "name": "Highlighter Yellow",
+        "hex": "#FACC15",
+        "usage": "Important Badges, 'Best Seller' tags, Subtle highlights"
+      },
+      "action": {
+        "name": "Success Green",
+        "hex": "#16A34A",
+        "usage": "Buy Now Buttons, Download Links (Positive Action)"
+      },
+      "text": {
+        "primary": "#1E293B",
+        "secondary": "#64748B",
+        "muted": "#94A3B8"
+      },
+      "border": {
+        "default": "#E2E8F0",
+        "active": "#CBD5E1"
+      }
+    },
+    "typography": {
+      "headings": {
+        "font_family": "Playfair Display, serif",
+        "weights": ["600", "700"],
+        "usage": "H1, H2, Section Titles. Adds authority and academic feel."
+      },
+      "body": {
+        "font_family": "Inter, sans-serif",
+        "weights": ["400", "500"],
+        "usage": "Paragraphs, UI elements, Data tables. Ensures readability."
+      },
+      "mono": {
+        "font_family": "JetBrains Mono, monospace",
+        "usage": "Order IDs, Price tags, Technical details."
+      }
+    },
+    "spacing": {
+      "scale": "Generous",
+      "container_padding": "p-6 md:p-12",
+      "section_gap": "gap-16 md:gap-24",
+      "element_gap": "gap-4 md:gap-6"
+    },
+    "radius": {
+      "default": "rounded-md",
+      "buttons": "rounded-full",
+      "cards": "rounded-xl"
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "marketing": "Mode A: Tetris Grid (Asymmetrical)",
+      "dashboard": "Mode B: Control Room Grid (Dense, Data-focused)",
+      "listing": "Responsive Grid: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+    },
+    "containers": {
+      "max_width": "max-w-7xl mx-auto",
+      "padding": "px-4 sm:px-6 lg:px-8"
+    }
+  },
+  "components": {
+    "strategy": "Hybrid: Shadcn for logic, Custom HTML/Tailwind for layout",
+    "library_path": "/app/frontend/src/components/ui",
+    "specifics": {
+      "buttons": {
+        "primary": "bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300",
+        "secondary": "bg-white text-primary border border-input hover:bg-accent hover:text-accent-foreground",
+        "ghost": "hover:bg-accent hover:text-accent-foreground"
+      },
+      "cards": {
+        "product": "group relative overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:-translate-y-1",
+        "admin_stat": "rounded-xl border bg-card p-6 shadow-sm"
+      },
+      "inputs": {
+        "style": "h-11 rounded-md border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      }
+    }
+  },
+  "assets": {
+    "icons": "Lucide React (default)",
+    "images": {
+      "hero_bg": {
+        "url": "https://images.unsplash.com/photo-1682203533347-10b924b3c253?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Student studying in library",
+        "usage": "Hero section background with overlay or side image"
+      },
+      "abstract_bg": {
+        "url": "https://images.unsplash.com/photo-1763569644322-932784ab5f16?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Abstract white geometric architecture",
+        "usage": "Subtle background for 'Why Choose Us' or 'Features' section"
+      },
+      "digital_delivery": {
+        "url": "https://images.unsplash.com/photo-1555960840-f536ae1e4e95?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Laptop workspace",
+        "usage": "Section explaining the digital download process"
+      },
+      "student_group": {
+        "url": "https://images.unsplash.com/photo-1591062182630-2cae7655ed1b?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Students discussing",
+        "usage": "Testimonials or Community section"
+      }
+    }
+  },
+  "pages": {
+    "user_home": {
+      "sections": [
+        "Hero: 'Get Your Academic Project in Seconds' - Trust & Speed focus",
+        "Search/Filter: Prominent search bar for subjects",
+        "Featured Subjects: Grid of top subjects (Computer Science, Management, etc.)",
+        "How it Works: 1. Choose -> 2. Pay -> 3. Download",
+        "Trust Signals: '100% Verified', 'Instant Delivery', 'Secure Payment'"
+      ]
+    },
+    "project_listing": {
+      "layout": "Sidebar (Filters) + Grid (Products)",
+      "card_content": "Title, Subject Tag, Price (₹), 'Buy Now' Button",
+      "filters": "Subject, Price Range, Popularity"
+    },
+    "admin_dashboard": {
+      "layout": "Sidebar Navigation + Main Content Area",
+      "widgets": "Total Sales, Recent Orders, Top Subjects",
+      "tables": "Dense, sortable, with status badges (Paid/Pending)"
+    }
+  },
+  "universal_guidelines": [
+    "DO NOT use generic 'SaaS Blue' gradients. Stick to the 'Academic Clarity' palette.",
+    "Ensure all text is legible. Contrast ratio > 4.5:1.",
+    "Use 'Playfair Display' for all H1 and H2 headings to maintain the brand identity.",
+    "Add 'data-testid' to all interactive elements.",
+    "Use 'sonner' for all toast notifications.",
+    "Mobile responsiveness is CRITICAL. Test grid collapses.",
+    "No 'Lorem Ipsum' in final output if possible. Use realistic academic titles (e.g., 'Library Management System', 'Sentiment Analysis using Python')."
+  ],
+  "instructions_to_main_agent": "You are building the frontend. Follow these guidelines strictly. Use the provided image URLs. Implement the 'Academic Clarity' theme using Tailwind config. Ensure the Admin panel is functional and dense, while the User panel is spacious and trustworthy."
+}
