@@ -281,6 +281,8 @@ async def create_subject(data: SubjectCreate, admin: dict = Depends(get_current_
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.subjects.insert_one(subject_doc)
+    # Remove MongoDB's _id before returning
+    subject_doc.pop("_id", None)
     subject_doc["project_count"] = 0
     return subject_doc
 
@@ -360,6 +362,8 @@ async def create_project(
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.projects.insert_one(project_doc)
+    # Remove MongoDB's _id before returning
+    project_doc.pop("_id", None)
     return project_doc
 
 @api_router.put("/projects/{project_id}")
