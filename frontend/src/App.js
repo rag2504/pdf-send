@@ -1,52 +1,42 @@
-import { useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { Toaster } from "@/components/ui/sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// User Pages
+import HomePage from "@/pages/HomePage";
+import SubjectsPage from "@/pages/SubjectsPage";
+import ProjectsPage from "@/pages/ProjectsPage";
+import CheckoutPage from "@/pages/CheckoutPage";
+import PaymentStatusPage from "@/pages/PaymentStatusPage";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+// Admin Pages
+import AdminLogin from "@/pages/admin/AdminLogin";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminSubjects from "@/pages/admin/AdminSubjects";
+import AdminProjects from "@/pages/admin/AdminProjects";
+import AdminOrders from "@/pages/admin/AdminOrders";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          {/* User Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/subjects" element={<SubjectsPage />} />
+          <Route path="/subjects/:subjectId" element={<ProjectsPage />} />
+          <Route path="/checkout/:projectId" element={<CheckoutPage />} />
+          <Route path="/payment-status" element={<PaymentStatusPage />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/subjects" element={<AdminSubjects />} />
+          <Route path="/admin/projects" element={<AdminProjects />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
         </Routes>
       </BrowserRouter>
+      <Toaster position="top-right" richColors />
     </div>
   );
 }

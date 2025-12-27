@@ -1,34 +1,124 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Academic Clarity Theme Styles */
+
+.hero-section {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.card-hover {
+    transition: all 0.3s ease;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Button Styles */
+.btn-success {
+    background-color: #16A34A;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #15803D;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgb(22 163 74 / 0.3);
+}
+
+/* Badge Styles */
+.badge-accent {
+    background-color: #FACC15;
+    color: #0F172A;
+}
+
+/* Price Tag */
+.price-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+/* Subject Card */
+.subject-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.subject-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #FACC15, #16A34A);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.subject-card:hover::before {
+    transform: scaleX(1);
+}
+
+/* Admin Sidebar */
+.admin-sidebar {
+    background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+}
+
+/* Table Styles */
+.data-table th {
+    background-color: #F8FAFC;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+/* Status Badges */
+.status-paid {
+    background-color: #DCFCE7;
+    color: #166534;
+}
+
+.status-pending {
+    background-color: #FEF9C3;
+    color: #854D0E;
+}
+
+.status-failed {
+    background-color: #FEE2E2;
+    color: #991B1B;
+}
+
+/* Form Styles */
+.form-input:focus {
+    border-color: #0F172A;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+}
+
+/* Trust Signal Icons */
+.trust-icon {
+    width: 48px;
+    height: 48px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+    border-radius: 12px;
+    background-color: #F0FDF4;
+    color: #16A34A;
 }
 
-.App-link {
-    color: #61dafb;
+/* Loading Spinner */
+.spinner {
+    border: 3px solid #E2E8F0;
+    border-top: 3px solid #0F172A;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
