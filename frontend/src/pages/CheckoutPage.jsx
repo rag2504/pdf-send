@@ -126,7 +126,7 @@ export default function CheckoutPage() {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2" data-testid="logo">
               <GraduationCap className="h-8 w-8 text-[#0F172A]" />
-              <span className="font-heading text-xl font-bold text-[#0F172A]">Assign Your Assignment</span>
+              <span className="font-heading text-xl font-bold text-[#0F172A]">Parul Creation</span>
             </Link>
           </div>
         </div>

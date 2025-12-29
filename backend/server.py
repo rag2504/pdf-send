@@ -54,7 +54,7 @@ JWT_ALGORITHM = "HS256"
 UPLOAD_DIR = ROOT_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-app = FastAPI(title="Assign Your Assignment API")
+app = FastAPI(title="Parul Creation API")
 api_router = APIRouter(prefix="/api")
 
 # Configure logging
@@ -174,13 +174,13 @@ async def send_pdf_email(customer_email: str, customer_name: str, project_title:
             <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h1 style="color: #0F172A;">Thank You for Your Purchase!</h1>
                 <p>Hi {customer_name},</p>
-                <p>Thank you for purchasing from <strong>Assign Your Assignment</strong>.</p>
+                <p>Thank you for purchasing from <strong>Parul Creation</strong>.</p>
                 <p>Your project PDF "<strong>{project_title}</strong>" is attached to this email.</p>
                 <hr style="border: 1px solid #E2E8F0; margin: 20px 0;">
                 <p style="color: #64748B; font-size: 14px;">
                     If you have any questions, please contact us.<br>
                     Best regards,<br>
-                    Assign Your Assignment Team
+                    Parul Creation Team
                 </p>
             </body>
         </html>
@@ -774,7 +774,7 @@ async def seed_data():
 
 @api_router.get("/")
 async def root():
-    return {"message": "Assign Your Assignment API", "status": "running"}
+    return {"message": "Parul Creation API", "status": "running"}
 
 @api_router.get("/health")
 async def health():
@@ -799,7 +799,7 @@ if __name__ == "__main__":
     import uvicorn
     
     # Print configuration info
-    print("🚀 Starting PDF Assignment Platform Backend...")
+    print("🚀 Starting Parul Creation Backend...")
     print(f"📊 MongoDB: {'✅ Configured' if os.environ.get('MONGODB_URI') else '❌ Not configured'}")
     print(f"💳 Cashfree: {'✅ Configured' if CASHFREE_APP_ID and CASHFREE_SECRET_KEY else '❌ Not configured'}")
     print(f"📧 Resend: {'✅ Configured' if os.environ.get('RESEND_API_KEY') else '❌ Not configured'}")

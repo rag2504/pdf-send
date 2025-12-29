@@ -13,7 +13,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2" data-testid="logo">
               <GraduationCap className="h-8 w-8 text-[#0F172A]" />
-              <span className="font-heading text-xl font-bold text-[#0F172A]">Assign Your Assignment</span>
+              <span className="font-heading text-xl font-bold text-[#0F172A]">Parul Creation</span>
             </Link>
             <nav className="flex items-center gap-4">
               <Link to="/subjects" className="text-[#64748B] hover:text-[#0F172A] font-medium transition-colors" data-testid="nav-subjects">
@@ -174,10 +174,10 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-8 w-8" />
-              <span className="font-heading text-xl font-bold">Assign Your Assignment</span>
+              <span className="font-heading text-xl font-bold">Parul Creation</span>
             </div>
             <p className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} Assign Your Assignment. All rights reserved.
+              © {new Date().getFullYear()} Parul Creation. All rights reserved.
             </p>
           </div>
         </div>
