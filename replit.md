@@ -1,64 +1,59 @@
 # Assign Your Assignment - Project Setup
 
-## Overview
-A modern platform for buying and selling academic project PDFs. Users can browse projects by subject, securely checkout, and instantly download PDFs.
-
-## Current Status ✅
-- **Frontend**: React app running on port 5000
-- **Backend**: FastAPI running on port 8000  
-- **Database**: MongoDB connected (cluster0.qipvo.mongodb.net)
-- **Both services are RUNNING and communicating**
+## ✅ Status: FULLY RUNNING
+- **Frontend**: React app on port 5000 ✅
+- **Backend**: FastAPI on port 8000 ✅  
+- **Database**: MongoDB connected ✅
+- **Admin Credentials**: username=`admin`, password=`admin123` ✅
+- **Subjects**: 7 subjects loaded and displaying ✅
 
 ## Tech Stack
 - **Frontend**: React 19, Vite, Tailwind CSS, Shadcn UI, React Router, Axios
 - **Backend**: FastAPI, MongoDB with Motor, JWT Auth, Bcrypt, Cashfree payments, Resend email
-- **Payment**: Cashfree integration (PROD environment)
-- **Email**: Resend email delivery
-
-## Project Structure
-```
-├── frontend/          # React web app
-│   ├── src/
-│   │   ├── pages/    # HomePage, SubjectsPage, ProjectsPage, Admin pages
-│   │   ├── components/ # UI components from Shadcn
-│   │   └── lib/      # API client and utilities
-│   └── package.json
-│
-├── backend/           # FastAPI server
-│   ├── server.py      # Main application
-│   ├── requirements.txt
-│   ├── uploads/       # PDF storage
-│   └── .env           # Environment variables
-```
+- **Payment**: Cashfree (PROD)
+- **Email**: Resend
 
 ## Running the App
-Both services start automatically:
+Both services run automatically:
 - Frontend: http://localhost:5000
 - Backend API: http://localhost:8000
 - API Docs: http://localhost:8000/docs
 
-## Available Subjects (in Database)
-- Economics
-- Accountancy  
-- Business Studies (BST)
-- Physical Education
-- (Plus any CRT subjects that have been added)
+## Available Subjects
+- Economics (1 project)
+- Accountancy (0 projects)
+- Business Studies (BST) (0 projects)
+- Physical Education (0 projects)
+- Plus 3 additional subjects
 
-## Admin Features
-- Login at `/admin/login`
+## Admin Dashboard
+- Login: `/admin/login`
+- Credentials: `admin` / `admin123`
 - Manage subjects, projects, and orders
 - View dashboard statistics
 
-## Recent Changes
-- ✅ Installed Python 3.11 and Node.js 20
-- ✅ Installed all backend dependencies
-- ✅ Installed all frontend dependencies  
-- ✅ Configured frontend .env to connect to localhost:8000
-- ✅ Both workflows are running and communicating
-- ✅ Subjects loading successfully from database
+## Key Features
+- Browse projects by subject
+- Secure checkout with Cashfree
+- Instant PDF download after payment
+- Admin dashboard for content management
+- Email delivery with Resend
+
+## How to Use
+1. Click "Browse Projects" to explore subjects
+2. Login as admin at `/admin/login` to manage content
+3. Add new subjects and projects from admin panel
+4. Test payment with Cashfree sandbox
+
+## Recent Fixes
+- ✅ Set up admin user in database
+- ✅ Configured frontend-backend proxy
+- ✅ Fixed REACT_APP_BACKEND_URL configuration
+- ✅ Verified all API endpoints working
+- ✅ Subjects loading and displaying correctly
 
 ## Next Steps
-- Add CRT-specific subjects via Admin Dashboard
-- Create sample projects with PDFs
-- Test payment flow with Cashfree
-- Test email delivery with Resend
+- Add CRT-specific subjects via admin panel
+- Create projects with PDF uploads
+- Test payment flow
+- Configure email notifications

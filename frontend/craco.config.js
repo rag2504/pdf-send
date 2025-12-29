@@ -62,6 +62,16 @@ webpackConfig.babel = {
 };
 
 webpackConfig.devServer = (devServerConfig) => {
+  // Add proxy for API requests to backend
+  devServerConfig.proxy = {
+    '/api': {
+      target: 'http://localhost:8000',
+      pathRewrite: { '^/api': '/api' },
+      changeOrigin: true,
+      ws: true,
+    },
+  };
+
   // Add health check endpoints if enabled
   if (config.enableHealthCheck && setupHealthEndpoints && healthPluginInstance) {
     const originalSetupMiddlewares = devServerConfig.setupMiddlewares;
