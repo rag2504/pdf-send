@@ -198,13 +198,21 @@ async def send_pdf_email(customer_email: str, customer_name: str, project_title:
         # Send email via SMTP
         def send_email():
             try:
-                server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+                server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10)
                 server.starttls()
+                # Send with explicit sender
                 server.login(EMAIL_USER, EMAIL_PASS)
-                server.send_message(msg)
+                server.sendmail(EMAIL_USER, [customer_email], msg.as_string())
                 server.quit()
                 logger.info(f"Email sent successfully to {customer_email}")
                 return True
+            except smtplib.SMTPAuthenticationError as e:
+                logger.error(f"Gmail authentication failed. Please check:")
+                logger.error(f"1. Enable 'Less secure app access' at: https://myaccount.google.com/u/0/lesssecureapps")
+                logger.error(f"2. Or generate an App Password at: https://myaccount.google.com/apppasswords")
+                logger.error(f"3. Make sure you're using the correct app password, not your Gmail password")
+                logger.error(f"SMTP Auth Error: {str(e)}")
+                return False
             except Exception as e:
                 logger.error(f"SMTP error: {str(e)}")
                 return False
