@@ -14,12 +14,16 @@ import jwt
 import bcrypt
 import aiofiles
 import asyncio
-import resend
 import json
 import hmac
 import hashlib
 import base64
 import httpx
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -29,9 +33,12 @@ mongo_url = os.environ['MONGODB_URI']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Resend configuration
-resend.api_key = os.environ.get('RESEND_API_KEY', '')
-SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+# Email configuration (Gmail SMTP)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USER = os.environ.get('EMAIL_USER', '')
+EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
+EMAIL_FROM = os.environ.get('EMAIL_FROM', 'BoxCric <boxcrick3@gmail.com>')
 
 # Cashfree configuration
 CASHFREE_APP_ID = os.environ.get('CASHFREE_APP_ID', '')
@@ -145,24 +152,26 @@ async def get_current_admin(request: Request):
     return verify_jwt_token(token)
 
 async def send_pdf_email(customer_email: str, customer_name: str, project_title: str, pdf_path: str):
-    """Send PDF via email using Resend"""
+    """Send PDF via email using Gmail SMTP"""
     try:
-        if not resend.api_key:
-            logger.warning("Resend API key not configured, skipping email")
+        if not EMAIL_USER or not EMAIL_PASS:
+            logger.warning("Email credentials not configured, skipping email")
             return False
         
         # Read PDF file
         async with aiofiles.open(pdf_path, 'rb') as f:
             pdf_content = await f.read()
         
-        pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+        # Create email message
+        msg = MIMEMultipart()
+        msg['From'] = EMAIL_FROM
+        msg['To'] = customer_email
+        msg['Subject'] = f"Your Project PDF - {project_title}"
         
-        params = {
-            "from": SENDER_EMAIL,
-            "to": [customer_email],
-            "subject": f"Your Project PDF - {project_title}",
-            "html": f"""
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        # Email body
+        body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h1 style="color: #0F172A;">Thank You for Your Purchase!</h1>
                 <p>Hi {customer_name},</p>
                 <p>Thank you for purchasing from <strong>Assign Your Assignment</strong>.</p>
@@ -173,19 +182,36 @@ async def send_pdf_email(customer_email: str, customer_name: str, project_title:
                     Best regards,<br>
                     Assign Your Assignment Team
                 </p>
-            </div>
-            """,
-            "attachments": [
-                {
-                    "filename": f"{project_title}.pdf",
-                    "content": pdf_base64
-                }
-            ]
-        }
+            </body>
+        </html>
+        """
         
-        email = await asyncio.to_thread(resend.Emails.send, params)
-        logger.info(f"Email sent successfully to {customer_email}")
-        return True
+        msg.attach(MIMEText(body, 'html'))
+        
+        # Attach PDF
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload(pdf_content)
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f'attachment; filename= {project_title}.pdf')
+        msg.attach(part)
+        
+        # Send email via SMTP
+        def send_email():
+            try:
+                server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+                server.starttls()
+                server.login(EMAIL_USER, EMAIL_PASS)
+                server.send_message(msg)
+                server.quit()
+                logger.info(f"Email sent successfully to {customer_email}")
+                return True
+            except Exception as e:
+                logger.error(f"SMTP error: {str(e)}")
+                return False
+        
+        # Run in thread pool
+        result = await asyncio.to_thread(send_email)
+        return result
     except Exception as e:
         logger.error(f"Failed to send email: {str(e)}")
         return False
