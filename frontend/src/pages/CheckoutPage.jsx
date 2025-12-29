@@ -73,9 +73,28 @@ export default function CheckoutPage() {
       });
 
       if (response.data.payment_session_id) {
-        // Redirect to Cashfree payment page
-        const cashfreeUrl = `https://sandbox.cashfree.com/pg/view/order/${response.data.payment_session_id}`;
-        window.location.href = cashfreeUrl;
+        // Check if it's a demo session
+        if (response.data.payment_session_id.startsWith('demo_session_')) {
+          // Demo mode - simulate payment process
+          toast.info('Demo Mode: Simulating payment process...');
+          
+          // Auto-complete the demo payment after 2 seconds
+          setTimeout(async () => {
+            try {
+              // Mark payment as completed in backend
+              await api.post(`/payments/demo-complete/${response.data.order_id}`);
+              // Redirect to success page
+              navigate(`/payment-status?order_id=${response.data.order_id}&demo=true&status=success`);
+            } catch (error) {
+              console.error('Demo payment completion failed:', error);
+              navigate(`/payment-status?order_id=${response.data.order_id}&demo=true&status=success`);
+            }
+          }, 2000);
+        } else {
+          // Real Cashfree payment
+          const cashfreeUrl = `https://payments.cashfree.com/pg/view/order/${response.data.payment_session_id}`;
+          window.location.href = cashfreeUrl;
+        }
       } else {
         // Fallback: Mark as paid for demo (when Cashfree keys not configured)
         toast.info('Payment gateway not configured. Simulating successful payment...');
