@@ -576,7 +576,7 @@ async def payment_webhook(request: Request, background_tasks: BackgroundTasks):
         return {"status": "error"}
 
 @api_router.post("/payments/demo-complete/{order_id}")
-async def complete_demo_payment(order_id: str):
+async def complete_demo_payment(order_id: str, background_tasks: BackgroundTasks):
     """Complete a demo payment for testing"""
     try:
         logger.info(f"Completing demo payment for order: {order_id}")
@@ -608,7 +608,14 @@ async def complete_demo_payment(order_id: str):
         project = await db.projects.find_one({"id": order["project_id"]}, {"_id": 0})
         if project:
             logger.info(f"Sending email for project: {project['title']}")
-            await send_project_email(order["customer_email"], order, project)
+            pdf_path = str(UPLOAD_DIR / project["file_name"])
+            background_tasks.add_task(
+                send_pdf_email,
+                order["customer_email"],
+                order["customer_name"],
+                project["title"],
+                pdf_path
+            )
         else:
             logger.warning(f"Project not found for order: {order_id}")
         

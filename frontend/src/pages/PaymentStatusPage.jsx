@@ -73,7 +73,7 @@ export default function PaymentStatusPage() {
     );
   }
 
-  const isPaid = order?.payment_status === 'PAID';
+  const isPaid = order?.payment_status === 'PAID' || order?.payment_status === 'SUCCESS';
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
