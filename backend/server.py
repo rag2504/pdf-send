@@ -195,27 +195,35 @@ async def send_pdf_email(customer_email: str, customer_name: str, project_title:
         part.add_header('Content-Disposition', f'attachment; filename= {project_title}.pdf')
         msg.attach(part)
         
-        # Send email via SMTP
+        # Send email via SMTP with retry
         def send_email():
-            try:
-                server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10)
-                server.starttls()
-                # Send with explicit sender
-                server.login(EMAIL_USER, EMAIL_PASS)
-                server.sendmail(EMAIL_USER, [customer_email], msg.as_string())
-                server.quit()
-                logger.info(f"Email sent successfully to {customer_email}")
-                return True
-            except smtplib.SMTPAuthenticationError as e:
-                logger.error(f"Gmail authentication failed. Please check:")
-                logger.error(f"1. Enable 'Less secure app access' at: https://myaccount.google.com/u/0/lesssecureapps")
-                logger.error(f"2. Or generate an App Password at: https://myaccount.google.com/apppasswords")
-                logger.error(f"3. Make sure you're using the correct app password, not your Gmail password")
-                logger.error(f"SMTP Auth Error: {str(e)}")
-                return False
-            except Exception as e:
-                logger.error(f"SMTP error: {str(e)}")
-                return False
+            max_retries = 2
+            for attempt in range(max_retries):
+                try:
+                    server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=15)
+                    server.starttls()
+                    server.login(EMAIL_USER, EMAIL_PASS)
+                    server.sendmail(EMAIL_USER, [customer_email], msg.as_string())
+                    server.close()
+                    logger.info(f"Email sent successfully to {customer_email}")
+                    return True
+                except smtplib.SMTPAuthenticationError as e:
+                    logger.error(f"Gmail authentication failed")
+                    logger.error(f"Check: 1. App password at https://myaccount.google.com/apppasswords")
+                    logger.error(f"Check: 2. Enable 2FA first if needed")
+                    return False
+                except (smtplib.SMTPException, ConnectionError, TimeoutError) as e:
+                    logger.warning(f"SMTP connection error (attempt {attempt + 1}/{max_retries}): {str(e)}")
+                    if attempt < max_retries - 1:
+                        import time
+                        time.sleep(1)  # Wait before retry
+                        continue
+                    logger.error(f"Failed to send email after {max_retries} attempts")
+                    return False
+                except Exception as e:
+                    logger.error(f"SMTP error: {str(e)}")
+                    return False
+            return False
         
         # Run in thread pool
         result = await asyncio.to_thread(send_email)
