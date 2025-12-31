@@ -115,7 +115,8 @@ class OrderResponse(BaseModel):
     subject_name: str
     amount: float
     payment_status: str
-    cashfree_order_id: Optional[str] = None
+    razorpay_order_id: Optional[str] = None
+    razorpay_payment_id: Optional[str] = None
     created_at: str
 
 class PaymentInitiate(BaseModel):
@@ -123,6 +124,11 @@ class PaymentInitiate(BaseModel):
     customer_email: EmailStr
     customer_phone: str
     project_id: str
+
+class PaymentVerify(BaseModel):
+    razorpay_payment_id: str
+    razorpay_order_id: str
+    razorpay_signature: str
 
 # ============ HELPER FUNCTIONS ============
 
@@ -642,12 +648,12 @@ async def complete_demo_payment(order_id: str, background_tasks: BackgroundTasks
         raise HTTPException(status_code=500, detail=f"Failed to complete demo payment: {str(e)}")
 
 @api_router.post("/payments/verify-payment")
-async def verify_payment(data: dict, background_tasks: BackgroundTasks):
+async def verify_payment(data: PaymentVerify, background_tasks: BackgroundTasks):
     """Verify Razorpay payment and trigger email if paid"""
     try:
-        razorpay_payment_id = data.get("razorpay_payment_id")
-        razorpay_order_id = data.get("razorpay_order_id")
-        razorpay_signature = data.get("razorpay_signature")
+        razorpay_payment_id = data.razorpay_payment_id
+        razorpay_order_id = data.razorpay_order_id
+        razorpay_signature = data.razorpay_signature
         
         # Find order by razorpay_order_id
         order = await db.orders.find_one({"razorpay_order_id": razorpay_order_id}, {"_id": 0})

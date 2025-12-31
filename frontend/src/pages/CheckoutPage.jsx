@@ -73,6 +73,8 @@ export default function CheckoutPage() {
       });
 
       if (response.data.razorpay_order_id && response.data.key_id) {
+        const internalOrderId = response.data.order_id;
+        
         // Open Razorpay payment modal
         const options = {
           key: response.data.key_id,
@@ -86,20 +88,21 @@ export default function CheckoutPage() {
             email: formData.customer_email,
             contact: formData.customer_phone
           },
-          handler: async function (response) {
+          handler: async function (paymentResponse) {
             try {
               // Verify payment on backend
-              const verifyResponse = await api.post('/payments/verify-payment', {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature
+              await api.post('/payments/verify-payment', {
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_signature: paymentResponse.razorpay_signature
               });
               
               toast.success('Payment successful!');
-              navigate(`/payment-status?order_id=${response.razorpay_order_id}`);
+              navigate(`/payment-status?order_id=${internalOrderId}`);
             } catch (error) {
               console.error('Payment verification failed:', error);
               toast.error('Payment verification failed');
+              navigate(`/payment-status?order_id=${internalOrderId}`);
             }
           },
           theme: {
