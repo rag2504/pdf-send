@@ -803,12 +803,12 @@ if __name__ == "__main__":
     import uvicorn
     
     # Print configuration info
-    print("🚀 Starting Parul Creation Backend...")
+    print("🚀 Starting PDF Assignment Platform Backend...")
     print(f"📊 MongoDB: {'✅ Configured' if os.environ.get('MONGODB_URI') else '❌ Not configured'}")
     print(f"💳 Razorpay: {'✅ Configured' if RAZORPAY_KEY_ID and RAZORPAY_SECRET_KEY else '❌ Not configured'}")
     print(f"📧 Email: {'✅ Configured' if os.environ.get('EMAIL_USER') else '❌ Not configured'}")
-    print(f"🌐 Environment: {CASHFREE_ENV}")
-    print(f"🔗 API URL: {CASHFREE_BASE_URL}")
+    print(f"🌐 Environment: Production")
+    print(f"🔗 API URL: {RAZORPAY_API_URL}")
     print("📡 Server starting...")
     print("📚 API Docs available at /docs")
     print("-" * 50)
