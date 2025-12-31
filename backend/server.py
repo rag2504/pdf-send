@@ -774,6 +774,27 @@ async def seed_data():
     
     return {"message": "Seed data created"}
 
+@api_router.get("/seed-data")
+async def seed_data_get():
+    """Seed initial subjects (GET method for browser access)"""
+    subjects = [
+        {"name": "Economics", "description": "Projects related to Economics and Financial Studies", "icon": "📊"},
+        {"name": "Accountancy", "description": "Accounting and Financial Management projects", "icon": "📒"},
+        {"name": "Business Studies (BST)", "description": "Business Studies and Management projects", "icon": "💼"},
+        {"name": "Physical Education", "description": "Sports and Physical Education projects", "icon": "🏃"},
+    ]
+    
+    created_count = 0
+    for subject in subjects:
+        existing = await db.subjects.find_one({"name": subject["name"]})
+        if not existing:
+            subject["id"] = str(uuid.uuid4())
+            subject["created_at"] = datetime.now(timezone.utc).isoformat()
+            await db.subjects.insert_one(subject)
+            created_count += 1
+    
+    return {"message": f"Seed data created. {created_count} new subjects added."}
+
 # ============ ROOT ROUTES ============
 
 @api_router.get("/")
