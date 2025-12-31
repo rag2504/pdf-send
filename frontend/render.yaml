@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: pdf-assignment-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s build -l $PORT
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        value: https://pdf-assignment-backend.onrender.com
+      - key: GENERATE_SOURCEMAP
+        value: "false"

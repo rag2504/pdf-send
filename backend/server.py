@@ -807,16 +807,17 @@ if __name__ == "__main__":
     print(f"📊 MongoDB: {'✅ Configured' if os.environ.get('MONGODB_URI') else '❌ Not configured'}")
     print(f"💳 Razorpay: {'✅ Configured' if RAZORPAY_KEY_ID and RAZORPAY_SECRET_KEY else '❌ Not configured'}")
     print(f"📧 Email: {'✅ Configured' if os.environ.get('EMAIL_USER') else '❌ Not configured'}")
-    print(f"🌐 Environment: Production")
-    print(f"🔗 API URL: {RAZORPAY_API_URL}")
-    print("📡 Server starting on http://localhost:8000")
-    print("📚 API Docs available at http://localhost:8000/docs")
+    print(f"🌐 Environment: {CASHFREE_ENV}")
+    print(f"🔗 API URL: {CASHFREE_BASE_URL}")
+    print("📡 Server starting...")
+    print("📚 API Docs available at /docs")
     print("-" * 50)
     
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,
+        port=port,
+        reload=False,  # Disable reload in production
         log_level="info"
     )

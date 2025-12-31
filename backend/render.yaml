@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: pdf-assignment-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGODB_URI
+        value: mongodb+srv://rag123456:rag123456@cluster0.qipvo.mongodb.net/
+      - key: DB_NAME
+        value: assign_your_assignment
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: JWT_SECRET
+        value: assign-your-assignment-secret-key-2024-secure
+      - key: CASHFREE_APP_ID
+        value: 10273687cc0f80bdee21e4c30d68637201
+      - key: CASHFREE_SECRET_KEY
+        value: cfsk_ma_prod_09c55cbdb72bc613fbf861ab777f8b7b_2bcc3b72
+      - key: CASHFREE_API_URL
+        value: https://api.cashfree.com/pg
+      - key: CASHFREE_ENV
+        value: PROD
+      - key: RESEND_API_KEY
+        value: re_QTrwPQSL_4S9fQTuqEAAhGAx3Lq2T1LhM
+      - key: SENDER_EMAIL
+        value: onboarding@resend.dev
