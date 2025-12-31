@@ -787,6 +787,11 @@ async def health():
 # Include router
 app.include_router(api_router)
 
+# Add a root route for debugging
+@app.get("/")
+async def root():
+    return {"message": "Parul Creation Backend API", "status": "running", "docs": "/docs"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -805,10 +810,8 @@ if __name__ == "__main__":
     # Print configuration info
     print("🚀 Starting PDF Assignment Platform Backend...")
     print(f"📊 MongoDB: {'✅ Configured' if os.environ.get('MONGODB_URI') else '❌ Not configured'}")
-    print(f"💳 Razorpay: {'✅ Configured' if RAZORPAY_KEY_ID and RAZORPAY_SECRET_KEY else '❌ Not configured'}")
+    print(f"💳 Razorpay: {'✅ Configured' if os.environ.get('RAZORPAY_KEY_ID') and os.environ.get('RAZORPAY_SECRET_KEY') else '❌ Not configured'}")
     print(f"📧 Email: {'✅ Configured' if os.environ.get('EMAIL_USER') else '❌ Not configured'}")
-    print(f"🌐 Environment: Production")
-    print(f"🔗 API URL: {RAZORPAY_API_URL}")
     print("📡 Server starting...")
     print("📚 API Docs available at /docs")
     print("-" * 50)
@@ -818,6 +821,6 @@ if __name__ == "__main__":
         "server:app",
         host="0.0.0.0",
         port=port,
-        reload=False,  # Disable reload in production
+        reload=False,
         log_level="info"
     )
