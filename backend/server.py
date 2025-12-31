@@ -40,11 +40,10 @@ EMAIL_USER = os.environ.get('EMAIL_USER', '')
 EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
 EMAIL_FROM = os.environ.get('EMAIL_FROM', 'BoxCric <boxcrick3@gmail.com>')
 
-# Cashfree configuration
-CASHFREE_APP_ID = os.environ.get('CASHFREE_APP_ID', '')
-CASHFREE_SECRET_KEY = os.environ.get('CASHFREE_SECRET_KEY', '')
-CASHFREE_ENV = os.environ.get('CASHFREE_ENV', 'TEST')  # TEST or PROD
-CASHFREE_BASE_URL = os.environ.get('CASHFREE_API_URL', 'https://sandbox.cashfree.com/pg' if CASHFREE_ENV == "TEST" else 'https://api.cashfree.com/pg')
+# Razorpay configuration
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
+RAZORPAY_SECRET_KEY = os.environ.get('RAZORPAY_SECRET_KEY', '')
+RAZORPAY_API_URL = os.environ.get('RAZORPAY_API_URL', 'https://api.razorpay.com/v1')
 
 # JWT Configuration
 JWT_SECRET = os.environ.get('JWT_SECRET', 'assign-your-assignment-secret-key-2024')
@@ -476,7 +475,7 @@ async def delete_project(project_id: str, admin: dict = Depends(get_current_admi
 
 @api_router.post("/payments/create-order")
 async def create_payment_order(data: PaymentInitiate):
-    """Create a Cashfree payment order"""
+    """Create a Razorpay payment order"""
     project = await db.projects.find_one({"id": data.project_id}, {"_id": 0})
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -495,122 +494,97 @@ async def create_payment_order(data: PaymentInitiate):
         "subject_name": project["subject_name"],
         "amount": project["price"],
         "payment_status": "PENDING",
-        "cashfree_order_id": None,
-        "payment_session_id": None,
+        "razorpay_order_id": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
-    # Create Cashfree order
-    if CASHFREE_APP_ID and CASHFREE_SECRET_KEY:
-        logger.info(f"Creating Cashfree order with APP_ID: {CASHFREE_APP_ID[:10]}... and BASE_URL: {CASHFREE_BASE_URL}")
+    # Create Razorpay order
+    if RAZORPAY_KEY_ID and RAZORPAY_SECRET_KEY:
+        logger.info(f"Creating Razorpay order with KEY_ID: {RAZORPAY_KEY_ID[:10]}...")
         try:
-            headers = {
-                "x-client-id": CASHFREE_APP_ID,
-                "x-client-secret": CASHFREE_SECRET_KEY,
-                "x-api-version": "2023-08-01",
-                "Content-Type": "application/json"
-            }
-            
-            frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
-            # For production Cashfree, we need HTTPS return URL
-            if CASHFREE_ENV == "PROD" and frontend_url.startswith('http://localhost'):
-                # Use a temporary HTTPS URL for development
-                return_url = f"https://projectbuy.preview.emergentagent.com/payment-status?order_id={order_id}"
-            else:
-                return_url = f"{frontend_url}/payment-status?order_id={order_id}"
-            
+            auth = (RAZORPAY_KEY_ID, RAZORPAY_SECRET_KEY)
             payload = {
-                "order_id": order_id,
-                "order_amount": project["price"],
-                "order_currency": "INR",
-                "customer_details": {
-                    "customer_id": f"CUST_{str(uuid.uuid4())[:8]}",
+                "amount": int(project["price"] * 100),  # Amount in paise
+                "currency": "INR",
+                "receipt": order_id,
+                "notes": {
                     "customer_name": data.customer_name,
                     "customer_email": data.customer_email,
-                    "customer_phone": data.customer_phone
-                },
-                "order_meta": {
-                    "return_url": return_url
+                    "customer_phone": data.customer_phone,
+                    "project_id": project["id"],
+                    "project_title": project["title"]
                 }
             }
             
-            logger.info(f"Cashfree payload: {payload}")
+            logger.info(f"Razorpay payload: {payload}")
             
             async with httpx.AsyncClient() as client_http:
                 response = await client_http.post(
-                    f"{CASHFREE_BASE_URL}/orders",
-                    headers=headers,
+                    f"{RAZORPAY_API_URL}/orders",
+                    auth=auth,
                     json=payload
                 )
                 
-                logger.info(f"Cashfree response status: {response.status_code}")
-                logger.info(f"Cashfree response: {response.text}")
+                logger.info(f"Razorpay response status: {response.status_code}")
+                logger.info(f"Razorpay response: {response.text}")
                 
                 if response.status_code == 200:
-                    cf_data = response.json()
-                    order_doc["cashfree_order_id"] = cf_data.get("cf_order_id")
-                    order_doc["payment_session_id"] = cf_data.get("payment_session_id")
-                    logger.info(f"Cashfree order created successfully: {cf_data}")
+                    rp_data = response.json()
+                    order_doc["razorpay_order_id"] = rp_data.get("id")
+                    logger.info(f"Razorpay order created successfully: {rp_data.get('id')}")
                 else:
-                    logger.error(f"Cashfree error: {response.text}")
-                    # If Cashfree fails, create a demo payment session
-                    logger.info("Creating demo payment session for development")
-                    order_doc["cashfree_order_id"] = f"DEMO_{order_id}"
-                    order_doc["payment_session_id"] = f"demo_session_{str(uuid.uuid4())[:8]}"
+                    logger.error(f"Razorpay error: {response.text}")
+                    raise Exception(f"Razorpay API error: {response.status_code}")
         except Exception as e:
-            logger.error(f"Cashfree order creation failed: {str(e)}")
-            # Fallback to demo mode
-            logger.info("Falling back to demo payment mode")
-            order_doc["cashfree_order_id"] = f"DEMO_{order_id}"
-            order_doc["payment_session_id"] = f"demo_session_{str(uuid.uuid4())[:8]}"
+            logger.error(f"Razorpay order creation failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Payment gateway error: {str(e)}")
     else:
-        logger.warning(f"Cashfree credentials missing - APP_ID: {'Yes' if CASHFREE_APP_ID else 'No'}, SECRET_KEY: {'Yes' if CASHFREE_SECRET_KEY else 'No'}")
-        # Demo mode when no credentials
-        order_doc["cashfree_order_id"] = f"DEMO_{order_id}"
-        order_doc["payment_session_id"] = f"demo_session_{str(uuid.uuid4())[:8]}"
+        logger.error("Razorpay credentials missing")
+        raise HTTPException(status_code=500, detail="Payment gateway not configured")
     
     await db.orders.insert_one(order_doc)
     
     return {
         "order_id": order_id,
-        "cashfree_order_id": order_doc.get("cashfree_order_id"),
-        "payment_session_id": order_doc.get("payment_session_id"),
+        "razorpay_order_id": order_doc.get("razorpay_order_id"),
         "amount": project["price"],
-        "project_title": project["title"]
+        "project_title": project["title"],
+        "key_id": RAZORPAY_KEY_ID
     }
 
 @api_router.post("/payments/webhook")
 async def payment_webhook(request: Request, background_tasks: BackgroundTasks):
-    """Handle Cashfree payment webhook"""
+    """Handle Razorpay payment webhook"""
     try:
         body = await request.body()
         data = json.loads(body)
         
         logger.info(f"Webhook received: {data}")
         
-        order_id = data.get("data", {}).get("order", {}).get("order_id")
-        payment_status = data.get("data", {}).get("payment", {}).get("payment_status")
-        
-        if order_id and payment_status == "SUCCESS":
-            # Update order status
-            order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
-            if order:
-                await db.orders.update_one(
-                    {"order_id": order_id},
-                    {"$set": {"payment_status": "PAID"}}
-                )
-                
-                # Get project and send email
-                project = await db.projects.find_one({"id": order["project_id"]}, {"_id": 0})
-                if project:
-                    pdf_path = str(UPLOAD_DIR / project["file_name"])
-                    background_tasks.add_task(
-                        send_pdf_email,
-                        order["customer_email"],
-                        order["customer_name"],
-                        project["title"],
-                        pdf_path
+        if data.get("event") == "payment.authorized":
+            razorpay_payment_id = data.get("payload", {}).get("payment", {}).get("entity", {}).get("id")
+            razorpay_order_id = data.get("payload", {}).get("payment", {}).get("entity", {}).get("order_id")
+            
+            if razorpay_order_id:
+                # Find order by razorpay_order_id
+                order = await db.orders.find_one({"razorpay_order_id": razorpay_order_id}, {"_id": 0})
+                if order:
+                    await db.orders.update_one(
+                        {"razorpay_order_id": razorpay_order_id},
+                        {"$set": {"payment_status": "PAID", "razorpay_payment_id": razorpay_payment_id}}
                     )
+                    
+                    # Get project and send email
+                    project = await db.projects.find_one({"id": order["project_id"]}, {"_id": 0})
+                    if project:
+                        pdf_path = str(UPLOAD_DIR / project["file_name"])
+                        background_tasks.add_task(
+                            send_pdf_email,
+                            order["customer_email"],
+                            order["customer_name"],
+                            project["title"],
+                            pdf_path
+                        )
         
         return {"status": "received"}
     except Exception as e:
@@ -667,52 +641,68 @@ async def complete_demo_payment(order_id: str, background_tasks: BackgroundTasks
         logger.error(f"Demo payment completion failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to complete demo payment: {str(e)}")
 
-@api_router.get("/payments/verify/{order_id}")
-async def verify_payment(order_id: str, background_tasks: BackgroundTasks):
-    """Verify payment status and trigger email if paid"""
-    order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    
-    # Check with Cashfree if pending
-    if order["payment_status"] == "PENDING" and CASHFREE_APP_ID and CASHFREE_SECRET_KEY:
-        try:
-            headers = {
-                "x-client-id": CASHFREE_APP_ID,
-                "x-client-secret": CASHFREE_SECRET_KEY,
-                "x-api-version": "2023-08-01"
-            }
+@api_router.post("/payments/verify-payment")
+async def verify_payment(data: dict, background_tasks: BackgroundTasks):
+    """Verify Razorpay payment and trigger email if paid"""
+    try:
+        razorpay_payment_id = data.get("razorpay_payment_id")
+        razorpay_order_id = data.get("razorpay_order_id")
+        razorpay_signature = data.get("razorpay_signature")
+        
+        # Find order by razorpay_order_id
+        order = await db.orders.find_one({"razorpay_order_id": razorpay_order_id}, {"_id": 0})
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        
+        # Verify signature
+        if RAZORPAY_SECRET_KEY:
+            message = f"{razorpay_order_id}|{razorpay_payment_id}"
+            signature = hmac.new(
+                RAZORPAY_SECRET_KEY.encode(),
+                message.encode(),
+                hashlib.sha256
+            ).hexdigest()
             
-            async with httpx.AsyncClient() as client_http:
-                response = await client_http.get(
-                    f"{CASHFREE_BASE_URL}/orders/{order_id}",
-                    headers=headers
-                )
-                
-                if response.status_code == 200:
-                    cf_data = response.json()
-                    if cf_data.get("order_status") == "PAID":
-                        await db.orders.update_one(
-                            {"order_id": order_id},
-                            {"$set": {"payment_status": "PAID"}}
-                        )
-                        order["payment_status"] = "PAID"
-                        
-                        # Send email
-                        project = await db.projects.find_one({"id": order["project_id"]}, {"_id": 0})
-                        if project:
-                            pdf_path = str(UPLOAD_DIR / project["file_name"])
-                            background_tasks.add_task(
-                                send_pdf_email,
-                                order["customer_email"],
-                                order["customer_name"],
-                                project["title"],
-                                pdf_path
+            if signature != razorpay_signature:
+                raise HTTPException(status_code=400, detail="Invalid payment signature")
+        
+        # Check payment status with Razorpay API if pending
+        if order["payment_status"] == "PENDING" and RAZORPAY_KEY_ID and RAZORPAY_SECRET_KEY:
+            try:
+                auth = (RAZORPAY_KEY_ID, RAZORPAY_SECRET_KEY)
+                async with httpx.AsyncClient() as client_http:
+                    response = await client_http.get(
+                        f"{RAZORPAY_API_URL}/payments/{razorpay_payment_id}",
+                        auth=auth
+                    )
+                    
+                    if response.status_code == 200:
+                        payment_data = response.json()
+                        if payment_data.get("status") == "captured":
+                            await db.orders.update_one(
+                                {"razorpay_order_id": razorpay_order_id},
+                                {"$set": {"payment_status": "PAID", "razorpay_payment_id": razorpay_payment_id}}
                             )
-        except Exception as e:
-            logger.error(f"Payment verification error: {str(e)}")
-    
-    return order
+                            order["payment_status"] = "PAID"
+                            
+                            # Send email
+                            project = await db.projects.find_one({"id": order["project_id"]}, {"_id": 0})
+                            if project:
+                                pdf_path = str(UPLOAD_DIR / project["file_name"])
+                                background_tasks.add_task(
+                                    send_pdf_email,
+                                    order["customer_email"],
+                                    order["customer_name"],
+                                    project["title"],
+                                    pdf_path
+                                )
+            except Exception as e:
+                logger.error(f"Payment verification error: {str(e)}")
+        
+        return order
+    except Exception as e:
+        logger.error(f"Payment verification failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
 
 @api_router.get("/orders", response_model=List[OrderResponse])
 async def get_orders(admin: dict = Depends(get_current_admin)):
@@ -809,10 +799,10 @@ if __name__ == "__main__":
     # Print configuration info
     print("🚀 Starting Parul Creation Backend...")
     print(f"📊 MongoDB: {'✅ Configured' if os.environ.get('MONGODB_URI') else '❌ Not configured'}")
-    print(f"💳 Cashfree: {'✅ Configured' if CASHFREE_APP_ID and CASHFREE_SECRET_KEY else '❌ Not configured'}")
-    print(f"📧 Resend: {'✅ Configured' if os.environ.get('RESEND_API_KEY') else '❌ Not configured'}")
-    print(f"🌐 Environment: {CASHFREE_ENV}")
-    print(f"🔗 API URL: {CASHFREE_BASE_URL}")
+    print(f"💳 Razorpay: {'✅ Configured' if RAZORPAY_KEY_ID and RAZORPAY_SECRET_KEY else '❌ Not configured'}")
+    print(f"📧 Email: {'✅ Configured' if os.environ.get('EMAIL_USER') else '❌ Not configured'}")
+    print(f"🌐 Environment: Production")
+    print(f"🔗 API URL: {RAZORPAY_API_URL}")
     print("📡 Server starting on http://localhost:8000")
     print("📚 API Docs available at http://localhost:8000/docs")
     print("-" * 50)

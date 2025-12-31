@@ -25,7 +25,7 @@ export default function PaymentStatusPage() {
   const verifyPayment = async () => {
     setVerifying(true);
     try {
-      const response = await api.get(`/payments/verify/${orderId}`);
+      const response = await api.get(`/orders/${orderId}`);
       setOrder(response.data);
       
       // If demo mode, simulate marking as paid

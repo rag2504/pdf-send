@@ -72,35 +72,49 @@ export default function CheckoutPage() {
         project_id: projectId
       });
 
-      if (response.data.payment_session_id) {
-        // Check if it's a demo session
-        if (response.data.payment_session_id.startsWith('demo_session_')) {
-          // Demo mode - simulate payment process
-          toast.info('Demo Mode: Simulating payment process...');
-          
-          // Auto-complete the demo payment after 2 seconds
-          setTimeout(async () => {
+      if (response.data.razorpay_order_id && response.data.key_id) {
+        // Open Razorpay payment modal
+        const options = {
+          key: response.data.key_id,
+          amount: response.data.amount * 100, // Convert to paise
+          currency: 'INR',
+          order_id: response.data.razorpay_order_id,
+          name: 'Parul Creation',
+          description: response.data.project_title,
+          prefill: {
+            name: formData.customer_name,
+            email: formData.customer_email,
+            contact: formData.customer_phone
+          },
+          handler: async function (response) {
             try {
-              // Mark payment as completed in backend
-              await api.post(`/payments/demo-complete/${response.data.order_id}`);
-              // Redirect to success page
-              navigate(`/payment-status?order_id=${response.data.order_id}&demo=true&status=success`);
+              // Verify payment on backend
+              const verifyResponse = await api.post('/payments/verify-payment', {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              });
+              
+              toast.success('Payment successful!');
+              navigate(`/payment-status?order_id=${response.razorpay_order_id}`);
             } catch (error) {
-              console.error('Demo payment completion failed:', error);
-              navigate(`/payment-status?order_id=${response.data.order_id}&demo=true&status=success`);
+              console.error('Payment verification failed:', error);
+              toast.error('Payment verification failed');
             }
-          }, 2000);
+          },
+          theme: {
+            color: '#0F172A'
+          }
+        };
+
+        if (window.Razorpay) {
+          const rzp = new window.Razorpay(options);
+          rzp.open();
         } else {
-          // Real Cashfree payment
-          const cashfreeUrl = `https://payments.cashfree.com/pg/view/order/${response.data.payment_session_id}`;
-          window.location.href = cashfreeUrl;
+          toast.error('Payment gateway not loaded. Please refresh and try again.');
         }
       } else {
-        // Fallback: Mark as paid for demo (when Cashfree keys not configured)
-        toast.info('Payment gateway not configured. Simulating successful payment...');
-        setTimeout(() => {
-          navigate(`/payment-status?order_id=${response.data.order_id}&demo=true`);
-        }, 1500);
+        toast.error('Failed to initiate payment. Please try again.');
       }
     } catch (error) {
       console.error('Error creating order:', error);
@@ -251,7 +265,7 @@ export default function CheckoutPage() {
 
               <div className="mt-6 flex items-center justify-center gap-4 text-[#64748B] text-sm">
                 <span>Powered by</span>
-                <span className="font-semibold">Cashfree</span>
+                <span className="font-semibold">Razorpay</span>
               </div>
             </div>
           </div>
